@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF ???????? - ???????? & ????</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .status-message {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .converter-box {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+        input[type="file"] { display: none; }
+        .file-label {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            display: inline-block;
+            margin: 10px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .file-label:hover {
+            transform: scale(1.05);
+            background: #764ba2;
+        }
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #output {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            display: none;
+        }
+        .progress {
+            display: none;
+            margin-top: 20px;
+        }
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            color: white;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .feature-card {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>?? PDF ???????? ????</h1>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div class="converter-box">
+            <h2>?? ???? PDF ????? ?????</h2>
+            <input type="file" id="pdfFile" accept=".pdf">
+            <label for="pdfFile" class="file-label">????? ?????</label>
+            <div id="fileName" style="margin-top: 10px; color: #666;"></div>
+            
+            <h3>?? ???????? ???? ?????:</h3>
+            <select id="conversionType">
+                <option value="">-- ????? --</option>
+                <option value="pdf-to-text">?? PDF ?? TEXT</option>
+                <option value="pdf-to-jpg">??? PDF ?? JPG</option>
+                <option value="extract-images">??? PDF ?? ?????? ???????</option>
+            </select>
+            
+            <button onclick="startConversion()" id="convertBtn">??????? ????</button>
+            
+            <div class="progress" id="progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill">0%</div>
+                </div>
+                <div id="progressText">??????????...</div>
+            </div>
+        </div>
+        
+        <div id="output">
+            <h3>? ???????? ???? ???!</h3>
+            <a id="downloadLink" href="#" download>
+                <button>?? ??????? ????</button>
+            </a>
+            <button onclick="resetConverter()" style="background: #dc3545; margin-left: 10px;">?? ?? ?????</button>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3>?? ???? ??? ????????</h3>
+                <p>???? ??????? ?????? ???? ???????? ??? ??????? ???? ???</p>
+            </div>
+            <div class="feature-card">
+                <h3>? ???? ??????????</h3>
+                <p>???????? ????????? ?? ??????</p>
+            </div>
+            <div class="feature-card">
+                <h3>?? ???? ??? ????</h3>
+                <p>??? ???? ????? ????, ??? ????? ????</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF.js ????????? -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <script>
+        // PDF.js ????????
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        
+        let selectedFile = null;
+        let objectURL = null; // ?????? ????????? ?? ???
+        
+        // ???????? ??????: ?????? ????? ??????
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            setTimeout(() => statusDiv.style.display = 'none', 5000);
+        }
+        
+        // ????? ????? ??
+        document.getElementById('pdfFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            
+            if(file) {
+                // ???? ????? ??? (50MB ?????)
+                if(file.size > 50 * 1024 * 1024) {
+                    showStatus('? ????? ???? ???? ??! ?????? 50MB ?? ??????? allowed ????', 'error');
+                    this.value = '';
+                    selectedFile = null;
+                    return;
+                }
+                
+                // ???? ???? ????????
+                if(file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                    showStatus('? ?????? PDF ??????? allowed ???!', 'error');
+                    this.value = '';
+                    selectedFile = null;
+                    return;
+                }
+                
+                selectedFile = file;
+                document.getElementById('fileName').textContent = `???? ?? ?????: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+                showStatus(`? ????? ???? ??: ${file.name}`, 'success');
+            }
+        });
+        
+        // ????????? ??? ????? ????
+        function updateProgress(percentage, text) {
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressFill').textContent = percentage + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+        
+        // ????? ???????? ??????
+        async function startConversion() {
+            if(!selectedFile) {
+                showStatus('? ???? PDF ????? ?????!', 'error');
+                return;
+            }
+            
+            const conversionType = document.getElementById('conversionType').value;
+            if(!conversionType) {
+                showStatus('? ????? ???????? ???? ?????!', 'error');
+                return;
+            }
+            
+            // ?????? objectURL ?? ????? ????
+            if(objectURL) {
+                URL.revokeObjectURL(objectURL);
+                objectURL = null;
+            }
+            
+            // UI ?????
+            document.getElementById('progress').style.display = 'block';
+            document.getElementById('output').style.display = 'none';
+            document.getElementById('convertBtn').disabled = true;
+            
+            try {
+                updateProgress(10, '????? ???? ?? ??? ??...');
+                
+                switch(conversionType) {
+                    case 'pdf-to-text':
+                        await convertPDFToText();
+                        break;
+                    case 'pdf-to-jpg':
+                        showStatus('??? PDF ?? JPG ?? ??? ??????? ??? ?????? ???? ???? ???? ???????? ?????', 'info');
+                        break;
+                    case 'extract-images':
+                        showStatus('??? ???? ????????????? ???? ????? ??? ????? ??????', 'info');
+                        break;
+                    default:
+                        throw new Error('?????? ???????? ????');
+                }
+            } catch(error) {
+                showStatus(`? ???: ${error.message}`, 'error');
+                console.error('???????? ???:', error);
+            } finally {
+                document.getElementById('progress').style.display = 'none';
+                document.getElementById('convertBtn').disabled = false;
+            }
+        }
+        
+        // PDF ?? TEXT ???????? (??-????)
+        async function convertPDFToText() {
+            return new Promise((resolve, reject) => {
+                const fileReader = new FileReader();
+                
+                fileReader.onload = async function() {
+                    try {
+                        const typedarray = new Uint8Array(this.result);
+                        const pdf = await pdfjsLib.getDocument({
+                            data: typedarray,
+                            password: '', // ??????? ??????????? PDF ?? ???
+                        }).promise;
+                        
+                        let fullText = '';
+                        const totalPages = pdf.numPages;
+                        
+                        for(let i = 1; i <= totalPages; i++) {
+                            updateProgress(20 + (i/totalPages * 60), `??? ${i} of ${totalPages} ??????? ?? ??? ??...`);
+                            
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            
+                            // ??????? ??????????
+                            const pageText = textContent.items
+                                .map(item => {
+                                    // ???????? ??? ????
+                                    if(item.hasEOL) return item.str + '\n';
+                                    return item.str;
+                                })
+                                .join(' ')
+                                .replace(/\s+/g, ' ') // ???????? ????? ?????
+                                .trim();
+                            
+                            fullText += `--- ??? ${i} ---\n\n${pageText}\n\n`;
+                        }
+                        
+                        if(!fullText.trim()) {
+                            throw new Error('?? PDF ??? ????? ????? ??????? ???? ???? (?? ???? ??????? ?? ??? ?? ???? ??)');
+                        }
+                        
+                        updateProgress(90, '????? ????? ?? ?? ??? ??...');
+                        
+                        // ??????? ????? ?????
+                        const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+                        objectURL = URL.createObjectURL(blob);
+                        
+                        const downloadLink = document.getElementById('downloadLink');
+                        downloadLink.href = objectURL;
+                        downloadLink.download = selectedFile.name.replace(/\.pdf$/i, '_converted.txt');
+                        
+                        updateProgress(100, '???? ???!');
+                        
+                        document.getElementById('output').style.display = 'block';
+                        showStatus(`? ?????! ${totalPages} ??? ??????? ????`, 'success');
+                        
+                        resolve();
+                    } catch(error) {
+                        reject(error);
+                    }
+                };
+                
+                fileReader.onerror = () => reject(new Error('????? ????? ??? ???'));
+                fileReader.readAsArrayBuffer(selectedFile);
+            });
+        }
+        
+        // ????? ??????
+        function resetConverter() {
+            if(objectURL) {
+                URL.revokeObjectURL(objectURL);
+                objectURL = null;
+            }
+            
+            selectedFile = null;
+            document.getElementById('pdfFile').value = '';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('conversionType').value = '';
+            document.getElementById('output').style.display = 'none';
+            document.getElementById('progress').style.display = 'none';
+            showStatus('? ?????? ????? ?? ??? ??? ?? ????? ??????', 'info');
+        }
+        
+        // ??? ??? ???? ?? ?????? ????? ????
+        window.addEventListener('beforeunload', function() {
+            if(objectURL) {
+                URL.revokeObjectURL(objectURL);
+            }
+        });
+        
+        // PDF.js ??? ????????
+        pdfjsLib.onError = function(error) {
+            showStatus(`? PDF ????????? ???: ${error.message}`, 'error');
+        };
+    </script>
+</body>
+</html>
