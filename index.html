@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF ???????? - ???????? & ????</title>
+    <title>PDF कन्वर्टर - तेज़ और सुरक्षित</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -139,69 +139,69 @@
 </head>
 <body>
     <div class="container">
-        <h1>?? PDF ???????? ????</h1>
-        
+        <h1>📄 PDF कन्वर्टर टूल</h1>
+
         <div id="statusMessage" class="status-message"></div>
-        
+
         <div class="converter-box">
-            <h2>?? ???? PDF ????? ?????</h2>
+            <h2>📁 अपनी PDF फ़ाइल चुनें</h2>
             <input type="file" id="pdfFile" accept=".pdf">
-            <label for="pdfFile" class="file-label">????? ?????</label>
+            <label for="pdfFile" class="file-label">फ़ाइल चुनें</label>
             <div id="fileName" style="margin-top: 10px; color: #666;"></div>
-            
-            <h3>?? ???????? ???? ?????:</h3>
+
+            <h3>🔄 कन्वर्ज़न प्रकार चुनें:</h3>
             <select id="conversionType">
-                <option value="">-- ????? --</option>
-                <option value="pdf-to-text">?? PDF ?? TEXT</option>
-                <option value="pdf-to-jpg">??? PDF ?? JPG</option>
-                <option value="extract-images">??? PDF ?? ?????? ???????</option>
+                <option value="">-- चुनें --</option>
+                <option value="pdf-to-text">📝 PDF से TEXT</option>
+                <option value="pdf-to-jpg">🖼️ PDF से JPG</option>
+                <option value="extract-images">🏞️ PDF से इमेज निकालें</option>
             </select>
-            
-            <button onclick="startConversion()" id="convertBtn">??????? ????</button>
-            
+
+            <button onclick="startConversion()" id="convertBtn">कन्वर्ट करें</button>
+
             <div class="progress" id="progress">
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill">0%</div>
                 </div>
-                <div id="progressText">??????????...</div>
+                <div id="progressText">प्रोसेसिंग...</div>
             </div>
         </div>
-        
+
         <div id="output">
-            <h3>? ???????? ???? ???!</h3>
+            <h3>✅ कन्वर्ज़न पूरा हुआ!</h3>
             <a id="downloadLink" href="#" download>
-                <button>?? ??????? ????</button>
+                <button>⬇️ डाउनलोड करें</button>
             </a>
-            <button onclick="resetConverter()" style="background: #dc3545; margin-left: 10px;">?? ?? ?????</button>
+            <button onclick="resetConverter()" style="background: #dc3545; margin-left: 10px;">🔄 फिर से शुरू करें</button>
         </div>
-        
+
         <div class="features">
             <div class="feature-card">
-                <h3>?? ???? ??? ????????</h3>
-                <p>???? ??????? ?????? ???? ???????? ??? ??????? ???? ???</p>
+                <h3>🔒 सुरक्षित कन्वर्ज़न</h3>
+                <p>आपकी फ़ाइलें आपके ब्राउज़र में ही प्रोसेस होती हैं</p>
             </div>
             <div class="feature-card">
-                <h3>? ???? ??????????</h3>
-                <p>???????? ????????? ?? ??????</p>
+                <h3>⚡ तेज़ प्रोसेसिंग</h3>
+                <p>लोकल प्रोसेसिंग के साथ तुरंत परिणाम</p>
             </div>
             <div class="feature-card">
-                <h3>?? ???? ??? ????</h3>
-                <p>??? ???? ????? ????, ??? ????? ????</p>
+                <h3>📱 सभी डिवाइस पर काम</h3>
+                <p>मोबाइल, टैबलेट और डेस्कटॉप पर उपयोग करें</p>
             </div>
         </div>
     </div>
 
-    <!-- PDF.js ????????? -->
+    <!-- PDF.js लाइब्रेरी -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    
+
     <script>
-        // PDF.js ????????
+        // PDF.js कॉन्फ़िगरेशन
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        
+
         let selectedFile = null;
-        let objectURL = null; // ?????? ????????? ?? ???
-        
-        // ???????? ??????: ?????? ????? ??????
+        let objectURL = null; // डाउनलोड लिंक साफ़ करने के लिए
+
+        // स्टेटस संदेश दिखाएं
         function showStatus(message, type = 'info') {
             const statusDiv = document.getElementById('statusMessage');
             statusDiv.className = `status-message ${type}`;
@@ -209,182 +209,180 @@
             statusDiv.style.display = 'block';
             setTimeout(() => statusDiv.style.display = 'none', 5000);
         }
-        
-        // ????? ????? ??
+
+        // फ़ाइल चुनने पर
         document.getElementById('pdfFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
-            
+
             if(file) {
-                // ???? ????? ??? (50MB ?????)
+                // फ़ाइल साइज़ जांच (50MB सीमा)
                 if(file.size > 50 * 1024 * 1024) {
-                    showStatus('? ????? ???? ???? ??! ?????? 50MB ?? ??????? allowed ????', 'error');
+                    showStatus('❌ फ़ाइल बहुत बड़ी है! कृपया 50MB से छोटी फ़ाइल चुनें', 'error');
                     this.value = '';
                     selectedFile = null;
                     return;
                 }
-                
-                // ???? ???? ????????
+
+                // फ़ाइल प्रकार जांच
                 if(file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-                    showStatus('? ?????? PDF ??????? allowed ???!', 'error');
+                    showStatus('❌ केवल PDF फ़ाइलें मान्य हैं!', 'error');
                     this.value = '';
                     selectedFile = null;
                     return;
                 }
-                
+
                 selectedFile = file;
-                document.getElementById('fileName').textContent = `???? ?? ?????: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
-                showStatus(`? ????? ???? ??: ${file.name}`, 'success');
+                document.getElementById('fileName').textContent = `चुनी गई फ़ाइल: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+                showStatus(`✅ फ़ाइल चुनी गई: ${file.name}`, 'success');
             }
         });
-        
-        // ????????? ??? ????? ????
+
+        // प्रगति अपडेट करें
         function updateProgress(percentage, text) {
             document.getElementById('progressFill').style.width = percentage + '%';
             document.getElementById('progressFill').textContent = percentage + '%';
             document.getElementById('progressText').textContent = text;
         }
-        
-        // ????? ???????? ??????
+
+        // कन्वर्ज़न शुरू करें
         async function startConversion() {
             if(!selectedFile) {
-                showStatus('? ???? PDF ????? ?????!', 'error');
+                showStatus('❌ कृपया PDF फ़ाइल चुनें!', 'error');
                 return;
             }
-            
+
             const conversionType = document.getElementById('conversionType').value;
             if(!conversionType) {
-                showStatus('? ????? ???????? ???? ?????!', 'error');
+                showStatus('❌ कृपया कन्वर्ज़न प्रकार चुनें!', 'error');
                 return;
             }
-            
-            // ?????? objectURL ?? ????? ????
+
+            // पुराने objectURL को साफ़ करें
             if(objectURL) {
                 URL.revokeObjectURL(objectURL);
                 objectURL = null;
             }
-            
-            // UI ?????
+
+            // UI अपडेट
             document.getElementById('progress').style.display = 'block';
             document.getElementById('output').style.display = 'none';
             document.getElementById('convertBtn').disabled = true;
-            
+
             try {
-                updateProgress(10, '????? ???? ?? ??? ??...');
-                
+                updateProgress(10, 'फ़ाइल पढ़ी जा रही है...');
+
                 switch(conversionType) {
                     case 'pdf-to-text':
                         await convertPDFToText();
                         break;
                     case 'pdf-to-jpg':
-                        showStatus('??? PDF ?? JPG ?? ??? ??????? ??? ?????? ???? ???? ???? ???????? ?????', 'info');
+                        showStatus('ℹ️ PDF से JPG सुविधा जल्द उपलब्ध होगी', 'info');
                         break;
                     case 'extract-images':
-                        showStatus('??? ???? ????????????? ???? ????? ??? ????? ??????', 'info');
+                        showStatus('ℹ️ इमेज निकालने की सुविधा जल्द उपलब्ध होगी', 'info');
                         break;
                     default:
-                        throw new Error('?????? ???????? ????');
+                        throw new Error('अमान्य कन्वर्ज़न प्रकार');
                 }
             } catch(error) {
-                showStatus(`? ???: ${error.message}`, 'error');
-                console.error('???????? ???:', error);
+                showStatus(`❌ त्रुटि: ${error.message}`, 'error');
+                console.error('कन्वर्ज़न त्रुटि:', error);
             } finally {
                 document.getElementById('progress').style.display = 'none';
                 document.getElementById('convertBtn').disabled = false;
             }
         }
-        
-        // PDF ?? TEXT ???????? (??-????)
+
+        // PDF से TEXT कन्वर्ज़न (क्लाइंट-साइड)
         async function convertPDFToText() {
             return new Promise((resolve, reject) => {
                 const fileReader = new FileReader();
-                
+
                 fileReader.onload = async function() {
                     try {
                         const typedarray = new Uint8Array(this.result);
                         const pdf = await pdfjsLib.getDocument({
                             data: typedarray,
-                            password: '', // ??????? ??????????? PDF ?? ???
+                            password: '', // पासवर्ड-संरक्षित PDF के लिए
                         }).promise;
-                        
+
                         let fullText = '';
                         const totalPages = pdf.numPages;
-                        
+
                         for(let i = 1; i <= totalPages; i++) {
-                            updateProgress(20 + (i/totalPages * 60), `??? ${i} of ${totalPages} ??????? ?? ??? ??...`);
-                            
+                            updateProgress(Math.round(20 + (i/totalPages * 60)), `पेज ${i} of ${totalPages} पढ़ा जा रहा है...`);
+
                             const page = await pdf.getPage(i);
                             const textContent = await page.getTextContent();
-                            
-                            // ??????? ??????????
+
+                            // टेक्स्ट एक्सट्रैक्शन
                             const pageText = textContent.items
-                                .map(item => {
-                                    // ???????? ??? ????
-                                    if(item.hasEOL) return item.str + '\n';
-                                    return item.str;
-                                })
-                                .join(' ')
-                                .replace(/\s+/g, ' ') // ???????? ????? ?????
-                                .trim();
-                            
-                            fullText += `--- ??? ${i} ---\n\n${pageText}\n\n`;
+                                .map(item => item.str + (item.hasEOL ? '\n' : ' '))
+                                .join('')
+                                .split('\n')
+                                .map(line => line.replace(/[ \t]+/g, ' ').trim())
+                                .filter(Boolean)
+                                .join('\n');
+
+                            fullText += `--- पेज ${i} ---\n\n${pageText}\n\n`;
                         }
-                        
+
                         if(!fullText.trim()) {
-                            throw new Error('?? PDF ??? ????? ????? ??????? ???? ???? (?? ???? ??????? ?? ??? ?? ???? ??)');
+                            throw new Error('इस PDF में पढ़ने योग्य टेक्स्ट नहीं मिला (यह स्कैन की गई इमेज हो सकती है)');
                         }
-                        
-                        updateProgress(90, '????? ????? ?? ?? ??? ??...');
-                        
-                        // ??????? ????? ?????
+
+                        updateProgress(90, 'टेक्स्ट फ़ाइल बनाई जा रही है...');
+
+                        // डाउनलोड फ़ाइल बनाएं
                         const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
                         objectURL = URL.createObjectURL(blob);
-                        
+
                         const downloadLink = document.getElementById('downloadLink');
                         downloadLink.href = objectURL;
                         downloadLink.download = selectedFile.name.replace(/\.pdf$/i, '_converted.txt');
-                        
-                        updateProgress(100, '???? ???!');
-                        
+
+                        updateProgress(100, 'पूरा हुआ!');
+
                         document.getElementById('output').style.display = 'block';
-                        showStatus(`? ?????! ${totalPages} ??? ??????? ????`, 'success');
-                        
+                        showStatus(`✅ सफलता! ${totalPages} पेज कन्वर्ट हुए`, 'success');
+
                         resolve();
                     } catch(error) {
                         reject(error);
                     }
                 };
-                
-                fileReader.onerror = () => reject(new Error('????? ????? ??? ???'));
+
+                fileReader.onerror = () => reject(new Error('फ़ाइल पढ़ने में त्रुटि'));
                 fileReader.readAsArrayBuffer(selectedFile);
             });
         }
-        
-        // ????? ??????
+
+        // रीसेट करें
         function resetConverter() {
             if(objectURL) {
                 URL.revokeObjectURL(objectURL);
                 objectURL = null;
             }
-            
+
             selectedFile = null;
             document.getElementById('pdfFile').value = '';
             document.getElementById('fileName').textContent = '';
             document.getElementById('conversionType').value = '';
             document.getElementById('output').style.display = 'none';
             document.getElementById('progress').style.display = 'none';
-            showStatus('? ?????? ????? ?? ??? ??? ?? ????? ??????', 'info');
+            showStatus('ℹ️ कन्वर्टर रीसेट हो गया है', 'info');
         }
-        
-        // ??? ??? ???? ?? ?????? ????? ????
+
+        // पेज बंद होने पर मेमोरी साफ़ करें
         window.addEventListener('beforeunload', function() {
             if(objectURL) {
                 URL.revokeObjectURL(objectURL);
             }
         });
-        
-        // PDF.js ??? ????????
+
+        // PDF.js त्रुटि हैंडलिंग
         pdfjsLib.onError = function(error) {
-            showStatus(`? PDF ????????? ???: ${error.message}`, 'error');
+            showStatus(`❌ PDF प्रोसेसिंग त्रुटि: ${error.message}`, 'error');
         };
     </script>
 </body>
